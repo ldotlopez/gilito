@@ -2,7 +2,7 @@ import csv
 import io
 import logging
 
-from gilito import mappers, models
+from gilito import mappers, LogBook, Transaction
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,13 +43,13 @@ class Mapper(mappers.Mapper):
         native_data = [convert_data_types(item) for item in bbva_data]
         transactions = [self._convert_item(item) for item in native_data]
 
-        return models.LogBook(transactions=transactions)
+        return LogBook(transactions=transactions)
 
     def _convert_item(self, item):
         notes = [item.get(FIELD_MOVIMIENTO), item.get(FIELD_OBSERVACIONES)]
         notes = " :: ".join([x for x in notes if x])
 
-        return models.Transaction(
+        return Transaction(
             date=item[FIELD_FECHA],
             amount=item[FIELD_IMPORTE],
             description=item[FIELD_CONCEPTO],

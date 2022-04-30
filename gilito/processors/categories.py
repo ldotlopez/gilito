@@ -1,63 +1,57 @@
 from gilito import processors
 from gilito.models import Category, Transaction
+from gilito.processors import Or, Contains
+
 
 CATEGORIES = [
-    ("Hogar", ["Charter consum"]),
-    ("Agua", ["facsa"]),
-    ("Ahorro", ["traspaso periódico a meta"]),
-    ("Electricidad", ["iberdrola", "adeudo de iberdrola"]),
-    ("Gas", ["gas natural"]),
-    ("Seguros", ["axa aurora vida"]),
-    ("Transporte", ["Bici-cas"]),
-    ("Vehículos", ["feu vert", "Compaãia valenciana"]),
-    ("Hipoteca", ["Cargo por amortizacion de prestamo/credito"]),
-    ("Hogar", ["adeudo cdad prop cl guitarrista fortea 17"]),
-    ("Mejoras casa", ["bricomart", "leroy merlin"]),
-    ("Nómina", ["abono de nómina"]),
-    ("Salud", ["Tabarca psicologia"]),
-    ("Estética", ["Tamara velazquez"]),
-    ("Telecomunicaciones", ["Adeudo pepe mobile, s.l.u."]),
+    ("Hogar", Contains("Charter consum")),
+    ("Agua", Contains("facsa")),
+    ("Ahorro", Contains("traspaso periódico a meta")),
+    ("Electricidad", Or([Contains("iberdrola"), Contains("adeudo de iberdrola")])),
+    ("Gas", Contains("gas natural")),
+    ("Seguros", Contains("axa aurora vida")),
+    ("Transporte", Contains("Bici-cas")),
+    ("Vehículos", Or([Contains("feu vert"), Contains("Compaãia valenciana")])),
+    ("Hipoteca", Contains("Cargo por amortizacion de prestamo/credito")),
+    ("Hogar", Contains("adeudo cdad prop cl guitarrista fortea 17")),
+    ("Mejoras casa", Or([Contains("bricomart"), Contains("leroy merlin")])),
+    ("Nómina", Contains("abono de nómina")),
+    ("Salud", Contains("Tabarca psicologia")),
+    ("Estética", Contains("Tamara velazquez")),
+    ("Telecomunicaciones", Contains("Adeudo pepe mobile, s.l.u.")),
     (
         "Jarana",
-        [
-            "15 tapas cb",
-            "cafe frappe",
-            "cafeteria comertel",
-            "cafeteria el sabroson",
-            "canaya",
-            "cocteleria absentia",
-            "copa y corte s.l",
-            "cru vineria sl",
-            "el jardi dels sentits",
-            "frankfurt 87",
-            "justeatspai",
-            "la garnatxa",
-            "la griferia",
-            "m top gastrobar cb",
-            "malabar hosteleria cb",
-            "mi cafe",
-            "panaderia 365",
-            "restaurante eleazar",
-            "restaurante uji",
-        ],
+        Or(
+            [
+                Contains("15 tapas cb"),
+                Contains("cafe frappe"),
+                Contains("cafeteria comertel"),
+                Contains("cafeteria el sabroson"),
+                Contains("canaya"),
+                Contains("cocteleria absentia"),
+                Contains("copa y corte s.l"),
+                Contains("cru vineria sl"),
+                Contains("el jardi dels sentits"),
+                Contains("frankfurt 87"),
+                Contains("justeatspai"),
+                Contains("la garnatxa"),
+                Contains("la griferia"),
+                Contains("m top gastrobar cb"),
+                Contains("malabar hosteleria cb"),
+                Contains("mi cafe"),
+                Contains("panaderia 365"),
+                Contains("restaurante eleazar"),
+                Contains("restaurante uji"),
+            ]
+        ),
     ),
 ]
 
 
 class Processor(processors.Processor):
     def process_one(self, transaction: Transaction) -> Transaction:
-
-        description = transaction.description.lower()
-        if notes := transaction.notes:
-            notes = notes.lower()  # type: ignore[union-attr]
-        else:
-            notes = ""
-
-        for (category, needles) in CATEGORIES:
-            for needle in needles:
-                needle = needle.lower()
-                if needle in description or needle in notes:
-                    transaction.category = Category(name=category)
-                    return transaction
+        for (category, f) in CATEGORIES:
+            if f.matches(transaction):
+                transaction.category = Category(name=category)
 
         return transaction

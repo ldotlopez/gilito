@@ -2,8 +2,8 @@ import os
 
 import click
 import gilito
+from gilito import PluginType
 import gilito.models
-from pathlib import Path
 import io
 
 
@@ -30,9 +30,9 @@ def convert_file_to_csv(file: io.BufferedReader, converter=None):
         _, ext = os.path.splitext(file.name)
         converter = ext[1:]
 
-    conv = gilito.get_plugin("converters", converter).Converter()
+    conv = gilito.get_plugin(PluginType.IMPORTER, converter).Importer()
 
-    print(conv.convert(file.read()))
+    print(conv.process(file.read()))
 
 
 @click.command(name="map")
@@ -49,7 +49,7 @@ def convert_file_to_csv(file: io.BufferedReader, converter=None):
     type=str,
 )
 def map_csv_to_transactions(file, mapper):
-    m = gilito.get_plugin("mappers", mapper).Mapper()
+    m = gilito.get_plugin(PluginType.MAPPER, mapper).Mapper()
 
     csvdata = file.read().decode("utf-8")
     logbook = m.map(csvdata)
@@ -77,7 +77,7 @@ def map_csv_to_transactions(file, mapper):
 def process_logbook(file, processors):
     logbook = gilito.models.LogBook.parse_raw(file.read())
     processors = [
-        gilito.get_plugin("processors", processor).Processor()
+        gilito.get_plugin(PluginType.PROCESSOR, processor).Processor()
         for processor in processors
     ]
 
@@ -123,19 +123,19 @@ def run(file, converter, mapper, processors):
     data = file.read()
 
     if converter:
-        Converter = gilito.get_plugin("converters", converter)
-        data = Converter().convert(data)
+        Importer = gilito.get_plugin(PluginType.IMPORTER, converter).Importer
+        data = Importer().convert(data)
 
     if mapper:
-        Mapper = gilito.get_plugin("mappers", mapper)
+        Mapper = gilito.get_plugin(PluginType.MAPPER, mapper).Mapper
         data = Mapper().map(data)
 
     if processors:
         for proc in processors:
-            Processor = gilito.get_plugin("processors", proc)
+            Processor = gilito.get_plugin(PluginType.PROCESSOR, proc).Processor
             data = Processor.process(data)
 
-    m = gilito.get_plugin("mappers", mapper).Mapper()
+    m = gilito.get_plugin(PluginType.MAPPER, mapper).Mapper()
 
     csvdata = file.read().decode("utf-8")
     logbook = m.map(csvdata)
@@ -149,6 +149,7 @@ def run(file, converter, mapper, processors):
 cli.add_command(convert_file_to_csv)
 cli.add_command(map_csv_to_transactions)
 cli.add_command(process_logbook)
+cli.add_command(run)
 
 
 if __name__ == "__main__":

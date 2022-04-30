@@ -24,6 +24,5 @@ class Transaction(pydantic.BaseModel):
     tags: List[Tag] = []
     currency: Optional[str]
 
-
-class LogBook(pydantic.BaseModel):
-    transactions: List[Transaction]
+    def __eq__(self, other):
+        return self.dict() == other.dict()
