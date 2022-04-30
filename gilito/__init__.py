@@ -36,6 +36,9 @@ LogBookT = TypeVar("LogBookT")
 
 
 class LogBook(Generic[LogBookT]):
+    TRANSACTION_INDEX_FIELDS = ["amount", "date", "origin", "destination"]
+    TRANSACTION_UPDATE_FIELDS = ["description", "notes", "category", "tags"]
+
     def __init__(self, *, transactions: Optional[List[Transaction]] = None):
         self._transactions: List = list(transactions or [])
 
@@ -58,31 +61,44 @@ class LogBook(Generic[LogBookT]):
         self._transactions = [x[3] for x in transactions]
 
     def override(self, overrides: LogBookT):
-        def _create_indexed_log(transactions):
-            ret = {}
+        def _get_transaction_idx_key(tr):
+            return tuple(
+                [getattr(tr, field) for field in self.TRANSACTION_INDEX_FIELDS]
+            )
+
+        def _build_indexed_table(transactions):
+            table = {}
 
             for tr in transactions:
-                if tr.date not in ret:
-                    ret[tr.date] = []
+                idx = _get_transaction_idx_key(tr)
+                if idx not in table:
+                    table[idx] = []
 
-                ret[tr.date].append(tr)
+                table[idx].append(tr)
 
-            return ret
+            return table
 
-        ours = _create_indexed_log(self.transactions)
+        def _update_transaction(base, updated):
+            for field in self.TRANSACTION_UPDATE_FIELDS:
+                setattr(base, field, getattr(updated, field, None))
+
+        ours = _build_indexed_table(self.transactions)
         updated = list(overrides)
 
         while updated:
             updated_transaction = updated.pop(0)
-            try:
-                idx = ours[updated_transaction.date].index(updated_transaction)
-            except (KeyError, ValueError):
-                pass
+            updated_idx = _get_transaction_idx_key(updated_transaction)
 
-            raise NotImplementedError(
-                "override is tricky: we can't match anything since anything can be "
-                "changed"
-            )
+            if updated_idx not in ours:
+                continue
+
+            for tr in ours[updated_idx]:
+                ours_idx = _get_transaction_idx_key(tr)
+                if ours_idx != updated_idx:
+                    continue
+
+                _update_transaction(tr, updated_transaction)
+                break
 
 
 class PluginType(enum.Enum):
