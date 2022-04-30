@@ -18,12 +18,9 @@
 # USA.
 
 
-import csv
-import io
 import logging
-from typing import Dict, List
 
-from gilito import LogBook, Transaction
+from gilito import LogBook, Transaction, TabularData
 from gilito.plugins import Mapper
 from gilito.typetools import as_currency, as_datetime, as_float
 
@@ -61,9 +58,12 @@ type_conversion_map = {
 
 
 class Plugin(Mapper):
-    def map(self, rows: List[Dict[str, str]]) -> LogBook:
-        bbva_data = self._filter_raw_csv(rows)
-        native_data = [self.map_to_native_types(item=item, fns=type_conversion_map) for item in bbva_data]
+    def map(self, data: TabularData) -> LogBook:
+        bbva_data = self._filter_raw_csv(data)
+        native_data = [
+            self.map_to_native_types(item=item, fns=type_conversion_map)
+            for item in bbva_data
+        ]
         transactions = [self._convert_row(item) for item in native_data]
 
         return LogBook(transactions=transactions)
@@ -81,18 +81,15 @@ class Plugin(Mapper):
             notes=notes or None,
         )
 
-    def _filter_raw_csv(self, csvdata):
-        fh = io.StringIO(csvdata)
-        reader = csv.reader(fh)
-
-        data = []
+    def _filter_raw_csv(self, data):
+        clean_data = []
         headers = []
-        for (idx, row) in enumerate(reader):
+        for (idx, row) in enumerate(data):
             if headers:
                 item = {headers[idx]: value for (idx, value) in enumerate(row)}
                 item = {k: v for (k, v) in item.items() if k and v not in (None, "")}
                 if is_valid_item(item):
-                    data.append(item)
+                    clean_data.append(item)
                     LOGGER.debug(f"data found at line {idx+1}")
                 else:
                     LOGGER.debug(f"invalid data found at line {idx+1}")
@@ -101,7 +98,7 @@ class Plugin(Mapper):
                 headers = row
                 LOGGER.debug(f"headers found at line {idx+1}: {headers}")
 
-        return data
+        return clean_data
 
 
 def is_headers_row(row):

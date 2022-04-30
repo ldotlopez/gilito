@@ -23,6 +23,8 @@ from typing import List, Optional
 
 import pydantic
 
+ValidationError = pydantic.ValidationError
+
 
 class Category(pydantic.BaseModel):
     name: str

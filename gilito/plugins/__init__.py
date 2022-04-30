@@ -19,9 +19,9 @@
 
 
 import abc
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict
 
-from gilito import LogBook, Transaction
+from gilito import LogBook, Transaction, TabularData
 
 
 class Plugin:
@@ -34,13 +34,13 @@ class Loader(Plugin):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def load(self, buffer: bytes) -> str:
+    def load(self, buffer: bytes) -> TabularData:
         raise NotImplementedError
 
 
 class Mapper(Plugin):
     @abc.abstractmethod
-    def map(self, rows: List[Dict[str, str]]) -> LogBook:
+    def map(self, data: TabularData) -> LogBook:
         raise NotImplementedError()
 
     @staticmethod

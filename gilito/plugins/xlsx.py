@@ -21,16 +21,16 @@
 import subprocess
 import tempfile
 import os
+from gilito import TabularData
+from gilito.plugins.csv import Plugin as CSVPlugin
 
-from gilito.plugins import Loader
 
-
-class Plugin(Loader):
+class Plugin(CSVPlugin):
     @classmethod
     def can_handle(cls, filename: str) -> bool:
         return filename.lower().endswith("xlsx")
 
-    def load(self, buffer: bytes) -> str:
+    def load(self, buffer: bytes) -> TabularData:
         fd, tempfilepath = tempfile.mkstemp()
         with os.fdopen(fd, mode="wb") as fh:
             fh.write(buffer)
@@ -56,4 +56,5 @@ class Plugin(Loader):
         os.unlink(tempfilepath)
 
         call.check_returncode()
-        return call.stdout.decode("utf-8")
+
+        return super().load(call.stdout)

@@ -20,9 +20,9 @@
 
 import enum
 import importlib
-from typing import Generic, List, Optional, TypeVar
+from typing import Any, Generic, List, NewType, Optional, TypeVar
 
-from .models import Transaction
+from .models import Category, Tag, Transaction
 
 # def factory(basecls, *args, **kwargs):
 #     for x in basecls.__subclasses__():
@@ -31,6 +31,8 @@ from .models import Transaction
 #
 #     if basecls.can_handle(*args, **kwargs):
 #         return basecls
+
+TabularData = NewType("TabularData", List[List[Any]])
 
 LogBookT = TypeVar("LogBookT")
 
@@ -113,4 +115,4 @@ def get_plugin(name: str):
     return importlib.import_module(f"gilito.plugins.{name}").Plugin
 
 
-__all__ = ["Transaction", "LogBook", "PluginType"]
+__all__ = ["Transaction", "LogBook", "PluginType", "Category", "Tag"]

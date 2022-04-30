@@ -31,7 +31,7 @@ def as_float(value):
 def as_datetime(value, fmt):
     if isinstance(value, datetime):
         return value
-    return datetime.strptime(value, "%d/%m/%Y")
+    return datetime.strptime(value, fmt)
 
 
 def as_currency(value):

@@ -22,11 +22,16 @@ import csv
 import io
 import typing
 
-from gilito import LogBook, Transaction
+from gilito import LogBook, Transaction, TabularData
 from gilito.plugins import Dumper
 
 
 class Plugin(Dumper):
+    def load(self, buffer: bytes) -> TabularData:
+        fh = io.StringIO(buffer.decode("utf-8"))
+        reader = csv.reader(fh)
+        return [row for row in reader]  # type: ignore[return-value]
+
     def dump(self, logbook: LogBook) -> bytes:
         def transactions_as_dict(x):
             ret = x.dict()
