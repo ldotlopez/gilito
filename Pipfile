@@ -4,16 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-xlrd = "*"
-click = "*"
 pydantic = "*"
-uno = "*"
-unoconv = "*"
+click = "*"
 
 [dev-packages]
-black = "*"
 ipython = "*"
 ipdb = "*"
+black = "*"
 isort = "*"
 
 [requires]
