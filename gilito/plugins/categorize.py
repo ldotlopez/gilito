@@ -24,8 +24,7 @@ from gilito.plugins import Processor
 
 class Plugin(Processor):
     def __init__(self, *args, processing_rules=None, **kwargs):
-        processing_rules = processing_rules or []
-        self.processing_rules = processing_rules
+        self.processing_rules = processing_rules or []
         super().__init__(*args, **kwargs)
 
     def process_one(self, transaction: Transaction) -> Transaction:
