@@ -13,17 +13,28 @@ from .models import Transaction
 #     if basecls.can_handle(*args, **kwargs):
 #         return basecls
 
-_LogBookTypeVar = TypeVar("_LogBookTypeVar")
+LogBookT = TypeVar("LogBookT")
 
 
-class LogBook(Generic[_LogBookTypeVar]):
+class LogBook(Generic[LogBookT]):
     def __init__(self, *, transactions: List[Transaction]):
         self.transactions: List = list(transactions)
 
     def __iter__(self):
         yield from iter(self.transactions)
 
-    def override(self, overrides: _LogBookTypeVar):
+    def merge(self, *logbooks: LogBookT):
+        logbooks = [self] + list(logbooks)
+
+        transactions = []
+        for book_idx, book in enumerate(logbooks):
+            for (line, tr) in enumerate(book.transactions):
+                transactions.append((tr.date, book_idx, line, tr))
+
+        transactions = sorted(transactions)
+        self.transactions = [x[3] for x in transactions]
+
+    def override(self, overrides: LogBookT):
         def _create_indexed_log(transactions):
             ret = {}
 
