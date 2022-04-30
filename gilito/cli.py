@@ -21,10 +21,8 @@
 from pathlib import Path
 
 import click
-
 import gilito
 from gilito import LogBook
-
 
 #
 # Define options
@@ -80,8 +78,18 @@ def _expand_paths(*paths: Path):
 @opt_processors
 @opt_dumper
 def cli(source, loader, mapper, processor, dumper):
-    def _it(it):
+    have_git_dir = (Path(__file__).parent.parent / ".git").is_dir()
+
+    def _it_as_list(it):
+        return list(it)
+
+    def _it_as_generator(it):
         yield from it
+
+    if have_git_dir:
+        _it = _it_as_list
+    else:
+        _it = _it_as_generator
 
     sources = sorted((Path(x) for x in source))
     sources = (
