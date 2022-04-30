@@ -73,8 +73,8 @@ class PluginType(enum.Enum):
     DUMPER = "dumpers"
 
 
-def get_plugin(type: PluginType, name: str):
-    return importlib.import_module(f"gilito.{type.value}.{name}")
+def get_plugin(name: str):
+    return importlib.import_module(f"gilito.plugins.{name}").Plugin
 
 
 __all__ = ["Transaction", "LogBook", "PluginType"]

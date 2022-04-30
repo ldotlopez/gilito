@@ -5,18 +5,12 @@ import click
 import gilito
 from gilito import LogBook
 
+
 #
 # Define options
 #
 
 opt_source = click.option("-s", "--source", multiple=True, required=True)
-
-# opt_file = click.option(
-#     "--file",
-#     required=True,
-#     help="Input filename (xlsx usually)",
-#     type=click.File(mode="rb", encoding=None, errors="strict", lazy=None, atomic=False),
-# )
 
 opt_loader = click.option(
     "--loader",
@@ -66,21 +60,24 @@ def _expand_paths(*paths: Path):
 @opt_processors
 @opt_dumper
 def cli(source, loader, mapper, processor, dumper):
+    def _it(it):
+        yield from it
+
     sources = sorted((Path(x) for x in source))
     sources = (
         x for x in _expand_paths(*sources) if x.is_file() and not x.name.startswith(".")
     )
 
     # Load data into memory
-    sources_data = (x.read_bytes() for x in sources)
+    sources_data = _it((x.read_bytes() for x in sources))
 
     # Parse raw data
-    ldr = gilito.get_plugin(gilito.PluginType.IMPORTER, loader).Importer()
-    sources_data = (ldr.process(x) for x in sources_data)
+    ldr = gilito.get_plugin(loader)()
+    sources_data = _it((ldr.load(x) for x in sources_data))
 
     # Map data into Logbooks and Transactions
-    m = gilito.get_plugin(gilito.PluginType.MAPPER, mapper).Mapper()
-    logbooks = (m.map(x) for x in sources_data)
+    mpr = gilito.get_plugin(mapper)()
+    logbooks = _it((mpr.map(x) for x in sources_data))
 
     # Merge all logbooks
     log = LogBook()
@@ -88,9 +85,9 @@ def cli(source, loader, mapper, processor, dumper):
 
     # Process logbook
     for proc in processor:
-        p = gilito.get_plugin(gilito.PluginType.PROCESSOR, proc).Processor()
-        p.process(log)
+        plg = gilito.get_plugin(proc)()
+        plg.process(log)
 
     # Dump
-    plg = gilito.get_plugin(gilito.PluginType.DUMPER, dumper).Dumper()
+    plg = gilito.get_plugin(dumper)()
     print(plg.dump(log).decode("utf-8"))

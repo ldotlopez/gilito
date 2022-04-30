@@ -3,7 +3,9 @@ import io
 import logging
 from typing import Dict, List
 
-from gilito import LogBook, Transaction, mappers
+from gilito import LogBook, Transaction
+from gilito.plugins import Mapper
+from gilito.typetools import as_currency, as_datetime, as_float
 
 LOGGER = logging.getLogger(__name__)
 
@@ -26,22 +28,22 @@ REQUIRED_FIELDS = [
 
 
 def _as_d_m_Y_datetime(value):
-    return mappers.as_datetime(value, "%d/%m/%Y")
+    return as_datetime(value, "%d/%m/%Y")
 
 
 type_conversion_map = {
-    FIELD_DISPONIBLE: mappers.as_float,
+    FIELD_DISPONIBLE: as_float,
     FIELD_F_VALOR: _as_d_m_Y_datetime,
     FIELD_FECHA: _as_d_m_Y_datetime,
-    FIELD_IMPORTE: mappers.as_float,
-    FIELD_DIVISA: mappers.as_currency,
+    FIELD_IMPORTE: as_float,
+    FIELD_DIVISA: as_currency,
 }
 
 
-class Mapper(mappers.Mapper):
+class Plugin(Mapper):
     def map(self, rows: List[Dict[str, str]]) -> LogBook:
         bbva_data = self._filter_raw_csv(rows)
-        native_data = [convert_data_types(item) for item in bbva_data]
+        native_data = [self.map_to_native_types(item=item, fns=type_conversion_map) for item in bbva_data]
         transactions = [self._convert_row(item) for item in native_data]
 
         return LogBook(transactions=transactions)
@@ -91,4 +93,4 @@ def is_valid_item(item):
 
 
 def convert_data_types(item):
-    return mappers.map_to_native_types(item=item, fns=type_conversion_map)
+    return self.map_to_native_types(item=item, fns=type_conversion_map)

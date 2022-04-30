@@ -1,13 +1,12 @@
-import abc
 import csv
 import io
 import typing
 
 from gilito import LogBook, Transaction
+from gilito.plugins import Dumper
 
 
-class Dumper:
-    @abc.abstractmethod
+class Plugin(Dumper):
     def dump(self, logbook: LogBook) -> bytes:
         def transactions_as_dict(x):
             ret = x.dict()
