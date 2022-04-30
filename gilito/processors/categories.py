@@ -1,7 +1,6 @@
 from gilito import processors
 from gilito.models import Category, Transaction
-from gilito.processors import Or, Contains
-
+from gilito.processors import Contains, Or
 
 CATEGORIES = [
     ("Hogar", Contains("Charter consum")),

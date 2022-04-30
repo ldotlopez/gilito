@@ -1,14 +1,14 @@
 import abc
-
-from gilito import LogBook, Transaction
-import io
 import csv
+import io
 import typing
 
+from gilito import LogBook, Transaction
 
-class Exporter:
+
+class Dumper:
     @abc.abstractmethod
-    def process(self, logbook: LogBook) -> bytes:
+    def dump(self, logbook: LogBook) -> bytes:
         def transactions_as_dict(x):
             ret = x.dict()
             if x.category:

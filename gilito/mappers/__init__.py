@@ -2,12 +2,12 @@ import abc
 import datetime
 from typing import Any, Callable, Dict, List
 
-from gilito.models import Transaction
+from gilito import LogBook
 
 
 class Mapper:
     @abc.abstractmethod
-    def map(self, rows: List[Dict[str, str]]) -> List[Transaction]:
+    def map(self, rows: List[Dict[str, str]]) -> LogBook:
         raise NotImplementedError()
 
 

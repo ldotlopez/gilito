@@ -30,6 +30,7 @@ class Importer(importers.Importer):
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            timeout=10,
             env={},  # type: ignore[arg-type]
         )
         os.unlink(tempfilepath)

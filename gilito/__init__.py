@@ -1,7 +1,6 @@
 import enum
 import importlib
-from typing import List, Dict, List, TypeVar, Generic
-from datetime import datetime
+from typing import Generic, List, Optional, TypeVar
 
 from .models import Transaction
 
@@ -17,8 +16,12 @@ LogBookT = TypeVar("LogBookT")
 
 
 class LogBook(Generic[LogBookT]):
-    def __init__(self, *, transactions: List[Transaction]):
-        self.transactions: List = list(transactions)
+    def __init__(self, *, transactions: Optional[List[Transaction]] = None):
+        self._transactions: List = list(transactions or [])
+
+    @property
+    def transactions(self):
+        return self._transactions
 
     def __iter__(self):
         yield from iter(self.transactions)
@@ -32,7 +35,7 @@ class LogBook(Generic[LogBookT]):
                 transactions.append((tr.date, book_idx, line, tr))
 
         transactions = sorted(transactions)
-        self.transactions = [x[3] for x in transactions]
+        self._transactions = [x[3] for x in transactions]
 
     def override(self, overrides: LogBookT):
         def _create_indexed_log(transactions):
@@ -67,6 +70,7 @@ class PluginType(enum.Enum):
     MAPPER = "mappers"
     PROCESSOR = "processors"
     EXPORTER = "exporters"
+    DUMPER = "dumpers"
 
 
 def get_plugin(type: PluginType, name: str):

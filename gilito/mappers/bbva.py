@@ -1,8 +1,9 @@
 import csv
 import io
 import logging
+from typing import Dict, List
 
-from gilito import mappers, LogBook, Transaction
+from gilito import LogBook, Transaction, mappers
 
 LOGGER = logging.getLogger(__name__)
 
@@ -38,14 +39,14 @@ type_conversion_map = {
 
 
 class Mapper(mappers.Mapper):
-    def map(self, csvdata):
-        bbva_data = self._filter_raw_csv(csvdata)
+    def map(self, rows: List[Dict[str, str]]) -> LogBook:
+        bbva_data = self._filter_raw_csv(rows)
         native_data = [convert_data_types(item) for item in bbva_data]
-        transactions = [self._convert_item(item) for item in native_data]
+        transactions = [self._convert_row(item) for item in native_data]
 
         return LogBook(transactions=transactions)
 
-    def _convert_item(self, item):
+    def _convert_row(self, item):
         notes = [item.get(FIELD_MOVIMIENTO), item.get(FIELD_OBSERVACIONES)]
         notes = " :: ".join([x for x in notes if x])
 
