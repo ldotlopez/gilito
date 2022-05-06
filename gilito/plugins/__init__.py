@@ -19,28 +19,28 @@
 
 
 import abc
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List
 
-from gilito import LogBook, Transaction, TabularData
+from gilito import LogBook, Transaction, UnmappedData
 
 
-class Plugin:
+class BasePlugin:
     pass
 
 
-class Loader(Plugin):
+class Loader(BasePlugin):
     @abc.abstractclassmethod
     def can_load_file(cls, filename: str) -> bool:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def load(self, buffer: bytes) -> TabularData:
+    def load(self, buffer: bytes) -> UnmappedData:
         raise NotImplementedError
 
 
-class Mapper(Plugin):
+class Mapper(BasePlugin):
     @abc.abstractmethod
-    def map(self, data: TabularData) -> LogBook:
+    def map(self, data: UnmappedData) -> List[Transaction]:
         raise NotImplementedError()
 
     @staticmethod
@@ -60,7 +60,7 @@ class Mapper(Plugin):
         return ret
 
 
-class Processor(Plugin):
+class Processor(BasePlugin):
     def process(self, logbook: LogBook):
         return LogBook(
             transactions=[self.process_one(item) for item in logbook.transactions]

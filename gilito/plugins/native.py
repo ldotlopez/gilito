@@ -22,7 +22,6 @@ from gilito.plugins import Loader, Dumper, Mapper
 import json
 from gilito import TabularData, LogBook, Transaction, Category
 from gilito.typetools import as_currency, as_datetime, as_float
-from gilito.models import ValidationError
 
 FIELD_AMOUNT = "amount"
 FIELD_CATEGORY = "category"

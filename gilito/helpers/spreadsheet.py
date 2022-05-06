@@ -18,36 +18,36 @@
 # USA.
 
 
-import datetime
-from typing import Any, Dict, List, NewType, Optional
-
-import pydantic
-
-ValidationError = pydantic.ValidationError
+import os
+import subprocess
+import tempfile
 
 
-class Category(pydantic.BaseModel):
-    name: str
+def spreadsheet_as_csv(buffer: bytes) -> bytes:
+    fd, tempfilepath = tempfile.mkstemp()
+    with os.fdopen(fd, mode="wb") as fh:
+        fh.write(buffer)
 
+    # Run unoconv isolated from current environment (i.ex. virtualenv)
+    call = subprocess.run(
+        [
+            "/usr/bin/unoconv",
+            "--doctype",
+            "spreadsheet",
+            "--format",
+            "csv",
+            "--preserve",
+            "--stdout",
+            tempfilepath,
+        ],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        timeout=10,
+        env={},  # type: ignore[arg-type]
+    )
+    os.unlink(tempfilepath)
 
-class Tag(pydantic.BaseModel):
-    name: str
+    call.check_returncode()
 
-
-class Transaction(pydantic.BaseModel):
-    amount: float
-    date: datetime.datetime
-    description: str
-
-    notes: Optional[str] = ""
-    origin: Optional[str]
-    destination: Optional[str]
-    category: Optional[Category]
-    tags: List[Tag] = []
-    currency: Optional[str]
-
-    def __eq__(self, other):
-        return self.dict() == other.dict()
-
-
-UnmappedData = NewType("UnmappedData", List[Dict[str, Any]])
+    return call.stdout

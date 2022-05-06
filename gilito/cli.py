@@ -105,7 +105,8 @@ def cli(source, loader, mapper, processor, dumper):
 
     # Map data into Logbooks and Transactions
     mpr = gilito.get_plugin(mapper)()
-    logbooks = _it((mpr.map(x) for x in sources_data))
+    transaction_groups = _it((mpr.map(x) for x in sources_data))
+    logbooks = (LogBook(transactions=x) for x in transaction_groups)
 
     # Merge all logbooks
     log = LogBook()

@@ -18,36 +18,12 @@
 # USA.
 
 
-import datetime
-from typing import Any, Dict, List, NewType, Optional
-
-import pydantic
-
-ValidationError = pydantic.ValidationError
+import csv
+import io
+from typing import Any, List
 
 
-class Category(pydantic.BaseModel):
-    name: str
-
-
-class Tag(pydantic.BaseModel):
-    name: str
-
-
-class Transaction(pydantic.BaseModel):
-    amount: float
-    date: datetime.datetime
-    description: str
-
-    notes: Optional[str] = ""
-    origin: Optional[str]
-    destination: Optional[str]
-    category: Optional[Category]
-    tags: List[Tag] = []
-    currency: Optional[str]
-
-    def __eq__(self, other):
-        return self.dict() == other.dict()
-
-
-UnmappedData = NewType("UnmappedData", List[Dict[str, Any]])
+def load_csv(buffer: bytes) -> List[List[Any]]:
+    fh = io.StringIO(buffer.decode("utf-8"))
+    reader = csv.reader(fh)
+    return [row for row in reader]  # type: ignore[return-value]
