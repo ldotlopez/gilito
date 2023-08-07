@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2022 Luis López <luis@cuarentaydos.com>
 #
@@ -41,8 +40,7 @@ def spreadsheet_as_csv(buffer: bytes) -> bytes:
             tempfilepath,
         ],
         stdin=subprocess.DEVNULL,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         timeout=10,
         env={},  # type: ignore[arg-type]
     )

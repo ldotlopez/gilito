@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2022 Luis López <luis@cuarentaydos.com>
 #
@@ -91,21 +90,21 @@ def cli(source, loader, mapper, processor, dumper):
     else:
         _it = _it_as_generator
 
-    sources = sorted((Path(x) for x in source))
+    sources = sorted(Path(x) for x in source)
     sources = (
         x for x in _expand_paths(*sources) if x.is_file() and not x.name.startswith(".")
     )
 
     # Load data into memory
-    sources_data = _it((x.read_bytes() for x in sources))
+    sources_data = _it(x.read_bytes() for x in sources)
 
     # Parse raw data
     ldr = gilito.get_plugin(loader)()
-    sources_data = _it((ldr.load(x) for x in sources_data))
+    sources_data = _it(ldr.load(x) for x in sources_data)
 
     # Map data into Logbooks and Transactions
     mpr = gilito.get_plugin(mapper)()
-    transaction_groups = _it((mpr.map(x) for x in sources_data))
+    transaction_groups = _it(mpr.map(x) for x in sources_data)
     logbooks = (LogBook(transactions=x) for x in transaction_groups)
 
     # Merge all logbooks

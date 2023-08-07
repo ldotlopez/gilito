@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2022 Luis López <luis@cuarentaydos.com>
 #
@@ -76,7 +75,7 @@ class Plugin(Loader, Mapper):
 
         return parsed_data
 
-    def map(self, data: UnmappedData) -> List[Transaction]:
+    def map(self, data: UnmappedData) -> list[Transaction]:
         def _map_item(raw_item):
             typed_item = self.map_to_native_types(
                 item=raw_item, fns=_type_conversion_map
@@ -95,14 +94,16 @@ class Plugin(Loader, Mapper):
                 origin=typed_item.get(FIELD_TARJETA),
                 currency=typed_item.get(FIELD_DIVISA),
                 notes=notes or None,
+                category=None,
+                destination=None,
             )
 
         return [_map_item(item) for item in data]
 
 
-def _parse_bbva_csv(data: List[List[Any]]) -> UnmappedData:
+def _parse_bbva_csv(data: list[list[Any]]) -> UnmappedData:
     clean_data = []
-    headers: List[str] = []
+    headers: list[str] = []
 
     for idx, row in enumerate(data):
         if headers:

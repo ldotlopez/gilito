@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2022 Luis López <luis@cuarentaydos.com>
 #
@@ -41,8 +40,8 @@ class LogBook(Generic[LogBookT]):
     TRANSACTION_MATCH_FIELDS = ["amount", "date", "origin", "destination"]
     TRANSACTION_UPDATE_FIELDS = ["description", "notes", "category", "tags"]
 
-    def __init__(self, *, transactions: Optional[List[Transaction]] = None):
-        self._transactions: List = list(transactions or [])
+    def __init__(self, *, transactions: list[Transaction] | None = None):
+        self._transactions: list = list(transactions or [])
 
     @property
     def transactions(self):

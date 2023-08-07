@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2022 Luis López <luis@cuarentaydos.com>
 #
@@ -19,7 +18,8 @@
 
 
 import abc
-from typing import Any, Callable, Dict, List
+from typing import Any, Dict, List
+from collections.abc import Callable
 
 from gilito import LogBook, Transaction, UnmappedData
 
@@ -40,13 +40,13 @@ class Loader(BasePlugin):
 
 class Mapper(BasePlugin):
     @abc.abstractmethod
-    def map(self, data: UnmappedData) -> List[Transaction]:
+    def map(self, data: UnmappedData) -> list[Transaction]:
         raise NotImplementedError()
 
     @staticmethod
     def map_to_native_types(
-        *, fns: Dict[str, Callable], item: Dict[str, str]
-    ) -> Dict[str, Any]:
+        *, fns: dict[str, Callable], item: dict[str, str]
+    ) -> dict[str, Any]:
         ret = {}
 
         for (k, v) in item.items():

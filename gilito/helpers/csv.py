@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2022 Luis López <luis@cuarentaydos.com>
 #
@@ -23,7 +22,7 @@ import io
 from typing import Any, List
 
 
-def load_csv(buffer: bytes) -> List[List[Any]]:
+def load_csv(buffer: bytes) -> list[list[Any]]:
     fh = io.StringIO(buffer.decode("utf-8"))
     reader = csv.reader(fh)
     return [row for row in reader]  # type: ignore[return-value]

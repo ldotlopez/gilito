@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2022 Luis López <luis@cuarentaydos.com>
 #
@@ -39,12 +38,12 @@ class Transaction(pydantic.BaseModel):
     date: datetime.datetime
     description: str
 
-    notes: Optional[str] = ""
-    origin: Optional[str]
-    destination: Optional[str]
-    category: Optional[Category]
-    tags: List[Tag] = []
-    currency: Optional[str]
+    notes: str | None = ""
+    origin: str | None
+    destination: str | None
+    category: Category | None
+    tags: list[Tag] = []
+    currency: str | None
 
     def __eq__(self, other):
         return self.dict() == other.dict()
@@ -53,4 +52,4 @@ class Transaction(pydantic.BaseModel):
         return f"{self.date.strftime('%d/%m/%Y')} {self.amount} € ({self.description})"
 
 
-UnmappedData = NewType("UnmappedData", List[Dict[str, Any]])
+UnmappedData = NewType("UnmappedData", list[dict[str, Any]])
