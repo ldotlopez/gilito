@@ -80,6 +80,27 @@ class LogBook(Generic[LogBookT]):
 
             return table
 
+        overrides_table = _build_indexed_table(overrides)
+        overrides_key_set = set(overrides_table.keys())
+
+    def override_(self, overrides: LogBookT):
+        def _get_transaction_idx_key(tr):
+            return tuple(
+                [getattr(tr, field) for field in self.TRANSACTION_INDEX_FIELDS]
+            )
+
+        def _build_indexed_table(transactions):
+            table = {}
+
+            for tr in transactions:
+                idx = _get_transaction_idx_key(tr)
+                if idx not in table:
+                    table[idx] = []
+
+                table[idx].append(tr)
+
+            return table
+
         def _update_transaction(base, updated):
             for field in self.TRANSACTION_UPDATE_FIELDS:
                 setattr(base, field, getattr(updated, field, None))

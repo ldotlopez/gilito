@@ -50,7 +50,13 @@ REQUIRED_FIELDS = [
 
 
 def _as_d_m_Y_datetime(value):
-    return as_datetime(value, "%d/%m/%Y")
+    for fmt in "%d/%m/%Y", "%d/%m/%y":
+        try:
+            return as_datetime(value, fmt)
+        except ValueError:
+            pass
+
+    raise ValueError(value)
 
 
 _type_conversion_map = {
@@ -83,7 +89,7 @@ class Plugin(Loader, Mapper):
             notes = " :: ".join([x for x in notes if x])
 
             return Transaction(
-                date=typed_item[FIELD_FECHA],
+                date=typed_item.get(FIELD_F_VALOR) or typed_item[FIELD_FECHA],
                 amount=typed_item[FIELD_IMPORTE],
                 description=typed_item[FIELD_CONCEPTO],
                 origin=typed_item.get(FIELD_TARJETA),
@@ -98,7 +104,7 @@ def _parse_bbva_csv(data: List[List[Any]]) -> UnmappedData:
     clean_data = []
     headers: List[str] = []
 
-    for (idx, row) in enumerate(data):
+    for idx, row in enumerate(data):
         if headers:
             item = {headers[idx]: value for (idx, value) in enumerate(row)}
             item = {k: v for (k, v) in item.items() if k and v not in (None, "")}

@@ -49,5 +49,8 @@ class Transaction(pydantic.BaseModel):
     def __eq__(self, other):
         return self.dict() == other.dict()
 
+    def __str__(self):
+        return f"{self.date.strftime('%d/%m/%Y')} {self.amount} € ({self.description})"
+
 
 UnmappedData = NewType("UnmappedData", List[Dict[str, Any]])

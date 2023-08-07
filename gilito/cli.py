@@ -115,7 +115,7 @@ def cli(source, loader, mapper, processor, dumper):
     # Process logbook
     for proc in processor:
         plg = gilito.get_plugin(proc)()
-        plg.process(log)
+        log = plg.process(log)
 
     # Dump
     plg = gilito.get_plugin(dumper)()

@@ -21,15 +21,20 @@
 from gilito.models import Category, Transaction
 from gilito.plugins import Processor
 
+import logging
+
+LOGGER = logging.getLogger(__name__)
+
 
 class Plugin(Processor):
-    def __init__(self, *args, processing_rules=None, **kwargs):
-        self.processing_rules = processing_rules or []
+    def __init__(self, *args, rules=None, **kwargs):
+        self.rules = rules or []
         super().__init__(*args, **kwargs)
 
     def process_one(self, transaction: Transaction) -> Transaction:
-        for (category, f) in self.processing_rules:
+        for (category, f) in self.rules:
             if f.matches(transaction):
                 transaction.category = Category(name=category)
+                LOGGER.debug(f"Category '{transaction.category} for {transaction}")
 
         return transaction
